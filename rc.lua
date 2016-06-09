@@ -147,7 +147,10 @@ cpuwidget = wibox.widget.textbox()
 vicious.register(cpuwidget, vicious.widgets.cpu, "CPU $1% ", 13)
 
 battery_widget = wibox.widget.textbox()
-vicious.register(battery_widget, vicious.widgets.bat, "BAT $1 $2% $3 ", 13, "BAT1")
+vicious.register(battery_widget, vicious.widgets.bat, "BAT $1 $2% ", 13, "BAT1")
+
+vol_widget = wibox.widget.textbox()
+vicious.register(vol_widget, vicious.widgets.volume, "$2 $1% ", 13, "Master")
 
 -- battery_timer = timer({timeout = 20})
 -- battery_timer:connect_signal("timeout", function()
@@ -260,6 +263,7 @@ for s = 1, screen.count() do
     -- right_layout:add(dnicon)
     -- right_layout:add(mynetwidget)
     right_layout:add(battery_widget)
+    right_layout:add(vol_widget)
     right_layout:add(cpuwidget)
     right_layout:add(memwidget)
     right_layout:add(mytextclock)
