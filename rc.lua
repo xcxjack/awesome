@@ -139,18 +139,18 @@ mytextclock = awful.widget.textclock()
 
 -- Create a memwidget
 memwidget = wibox.widget.textbox()
-vicious.register(memwidget, vicious.widgets.mem, "Mem $1% ", 13)
+vicious.register(memwidget, vicious.widgets.mem, "Mem <span color='yellow'>$1% </span>", 13)
 
 -- Create a cpuwidget
 cpuwidget = wibox.widget.textbox()
 -- Register widget
-vicious.register(cpuwidget, vicious.widgets.cpu, "CPU $1% ", 13)
+vicious.register(cpuwidget, vicious.widgets.cpu, "CPU <span color='yellow'>$1% </span>", 13)
 
 battery_widget = wibox.widget.textbox()
-vicious.register(battery_widget, vicious.widgets.bat, "BAT $1 $2% ", 13, "BAT1")
+vicious.register(battery_widget, vicious.widgets.bat, "BAT <span color='yellow'>$1 $2% </span>", 13, "BAT1")
 
 vol_widget = wibox.widget.textbox()
-vicious.register(vol_widget, vicious.widgets.volume, "$2 $1% ", 13, "Master")
+vicious.register(vol_widget, vicious.widgets.volume, "$2 <span color='yellow'>$1% </span>", 13, "Master")
 
 -- battery_timer = timer({timeout = 20})
 -- battery_timer:connect_signal("timeout", function()
@@ -295,15 +295,15 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
 
     awful.key({ modkey,           }, "j",
-    function ()
-        awful.client.focus.byidx( 1)
-        if client.focus then client.focus:raise() end
-    end),
+        function ()
+            awful.client.focus.byidx( 1)
+            if client.focus then client.focus:raise() end
+        end),
     awful.key({ modkey,           }, "k",
-    function ()
-        awful.client.focus.byidx(-1)
-        if client.focus then client.focus:raise() end
-    end),
+        function ()
+            awful.client.focus.byidx(-1)
+            if client.focus then client.focus:raise() end
+        end),
     awful.key({ modkey,           }, "w", function () mymainmenu:show() end),
 
     -- Layout manipulation
@@ -347,7 +347,14 @@ globalkeys = awful.util.table.join(
         awful.util.getdir("cache") .. "/history_eval")
     end),
     -- Menubar
-    awful.key({ modkey }, "p", function() menubar.show() end)
+    awful.key({ modkey }, "p", function() menubar.show() end),
+
+    -- User defined, lightness control
+    awful.key({ modkey }, "=", function() awful.util.spawn_with_shell("xbacklight -inc 10") end),
+    awful.key({ modkey }, "-", function() awful.util.spawn_with_shell("xbacklight -dec 10") end),
+    awful.key({ "Mod1"}, "=", function() awful.util.spawn_with_shell("amixer set Master 9+") end),
+    awful.key({ "Mod1"}, "-", function() awful.util.spawn_with_shell("amixer set Master 9-") end),
+    awful.key({ "Mod1"}, "m", function() awful.util.spawn_with_shell("amixer set Master toggle") end)
 )
 
 clientkeys = awful.util.table.join(
@@ -460,92 +467,92 @@ awful.rules.rules = {
     -- Set Firefox to always map on tags number 2 of screen 1.
     -- { rule = { class = "Firefox" },
     --   properties = { tag = tags[1][2] } },
-    { rule = { class = "QQ.exe" },
-    properties = { 
-        floating = true, 
-        border_width = 0,
-        focus = myfocus_filter
-    } },
+    -- { rule = { class = "QQ.exe" },
+    -- properties = { 
+    --     floating = true, 
+    --     border_width = 0,
+    --     focus = myfocus_filter
+    -- } },
     
 }
 -- }}}
 
 -- {{{ Signals
 -- Signal function to execute when a new client appears.
-client.connect_signal("manage", function (c, startup)
+-- client.connect_signal("manage", function (c, startup)
 
-    if c.instance == 'QQ.exe' then
-        -- 关闭各类新闻通知小窗口
-        if c.name and c.name:match('^腾讯') and c.above then
-            c:kill()
-        end
-    end 
+--     if c.instance == 'QQ.exe' then
+--         -- 关闭各类新闻通知小窗口
+--         if c.name and c.name:match('^腾讯') and c.above then
+--             c:kill()
+--         end
+--     end 
 
-    -- Enable sloppy focus
-    c:connect_signal("mouse::enter", function(c)
-        if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
-            and awful.client.focus.filter(c) then
-            client.focus = c
-        end
-    end)
+--     -- Enable sloppy focus
+--     c:connect_signal("mouse::enter", function(c)
+--         if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
+--             and awful.client.focus.filter(c) then
+--             client.focus = c
+--         end
+--     end)
 
-    if not startup then
-        -- Set the windows at the slave,
-        -- i.e. put it at the end of others instead of setting it master.
-        -- awful.client.setslave(c)
+--     if not startup then
+--         -- Set the windows at the slave,
+--         -- i.e. put it at the end of others instead of setting it master.
+--         -- awful.client.setslave(c)
 
-        -- Put windows in a smart way, only if they does not set an initial position.
-        if not c.size_hints.user_position and not c.size_hints.program_position then
-            awful.placement.no_overlap(c)
-            awful.placement.no_offscreen(c)
-        end
-    end
+--         -- Put windows in a smart way, only if they does not set an initial position.
+--         if not c.size_hints.user_position and not c.size_hints.program_position then
+--             awful.placement.no_overlap(c)
+--             awful.placement.no_offscreen(c)
+--         end
+--     end
 
-    local titlebars_enabled = false
-    if titlebars_enabled and (c.type == "normal" or c.type == "dialog") then
-        -- buttons for the titlebar
-        local buttons = awful.util.table.join(
-        awful.button({ }, 1, function()
-            client.focus = c
-            c:raise()
-            awful.mouse.client.move(c)
-        end),
-        awful.button({ }, 3, function()
-            client.focus = c
-            c:raise()
-            awful.mouse.client.resize(c)
-        end)
-        )
+--     local titlebars_enabled = false
+--     if titlebars_enabled and (c.type == "normal" or c.type == "dialog") then
+--         -- buttons for the titlebar
+--         local buttons = awful.util.table.join(
+--         awful.button({ }, 1, function()
+--             client.focus = c
+--             c:raise()
+--             awful.mouse.client.move(c)
+--         end),
+--         awful.button({ }, 3, function()
+--             client.focus = c
+--             c:raise()
+--             awful.mouse.client.resize(c)
+--         end)
+--         )
 
-        -- Widgets that are aligned to the left
-        local left_layout = wibox.layout.fixed.horizontal()
-        left_layout:add(awful.titlebar.widget.iconwidget(c))
-        left_layout:buttons(buttons)
+--         -- Widgets that are aligned to the left
+--         local left_layout = wibox.layout.fixed.horizontal()
+--         left_layout:add(awful.titlebar.widget.iconwidget(c))
+--         left_layout:buttons(buttons)
 
-        -- Widgets that are aligned to the right
-        local right_layout = wibox.layout.fixed.horizontal()
-        right_layout:add(awful.titlebar.widget.floatingbutton(c))
-        right_layout:add(awful.titlebar.widget.maximizedbutton(c))
-        right_layout:add(awful.titlebar.widget.stickybutton(c))
-        right_layout:add(awful.titlebar.widget.ontopbutton(c))
-        right_layout:add(awful.titlebar.widget.closebutton(c))
+--         -- Widgets that are aligned to the right
+--         local right_layout = wibox.layout.fixed.horizontal()
+--         right_layout:add(awful.titlebar.widget.floatingbutton(c))
+--         right_layout:add(awful.titlebar.widget.maximizedbutton(c))
+--         right_layout:add(awful.titlebar.widget.stickybutton(c))
+--         right_layout:add(awful.titlebar.widget.ontopbutton(c))
+--         right_layout:add(awful.titlebar.widget.closebutton(c))
 
-        -- The title goes in the middle
-        local middle_layout = wibox.layout.flex.horizontal()
-        local title = awful.titlebar.widget.titlewidget(c)
-        title:set_align("center")
-        middle_layout:add(title)
-        middle_layout:buttons(buttons)
+--         -- The title goes in the middle
+--         local middle_layout = wibox.layout.flex.horizontal()
+--         local title = awful.titlebar.widget.titlewidget(c)
+--         title:set_align("center")
+--         middle_layout:add(title)
+--         middle_layout:buttons(buttons)
 
-        -- Now bring it all together
-        local layout = wibox.layout.align.horizontal()
-        layout:set_left(left_layout)
-        layout:set_right(right_layout)
-        layout:set_middle(middle_layout)
+--         -- Now bring it all together
+--         local layout = wibox.layout.align.horizontal()
+--         layout:set_left(left_layout)
+--         layout:set_right(right_layout)
+--         layout:set_middle(middle_layout)
 
-        awful.titlebar(c):set_widget(layout)
-    end
-end)
+--         awful.titlebar(c):set_widget(layout)
+--     end
+-- end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
