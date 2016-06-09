@@ -352,8 +352,8 @@ globalkeys = awful.util.table.join(
     -- User defined, lightness control
     awful.key({ modkey }, "=", function() awful.util.spawn_with_shell("xbacklight -inc 10") end),
     awful.key({ modkey }, "-", function() awful.util.spawn_with_shell("xbacklight -dec 10") end),
-    awful.key({ "Mod1"}, "=", function() awful.util.spawn_with_shell("amixer set Master 9+") end),
-    awful.key({ "Mod1"}, "-", function() awful.util.spawn_with_shell("amixer set Master 9-") end),
+    awful.key({ "Mod1"}, "=", function() awful.util.spawn_with_shell("amixer set Master 5+") end),
+    awful.key({ "Mod1"}, "-", function() awful.util.spawn_with_shell("amixer set Master 5-") end),
     awful.key({ "Mod1"}, "m", function() awful.util.spawn_with_shell("amixer set Master toggle") end)
 )
 
