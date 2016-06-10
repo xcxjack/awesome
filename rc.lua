@@ -289,7 +289,6 @@ root.buttons(awful.util.table.join(
 
 -- {{{ Key bindings
 globalkeys = awful.util.table.join(
-    awful.key({                   }, "Print", function () awful.util.spawn("scrot -e 'mv $f ~/picture/ 2>/dev/null'") end),
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
     awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
@@ -350,9 +349,11 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey }, "p", function() menubar.show() end),
 
     -- User defined widgets
-    awful.key({ modkey }, "=", function() awful.util.spawn_with_shell("xbacklight -inc 10") end),
-    awful.key({ modkey }, "-", function() awful.util.spawn_with_shell("xbacklight -dec 10") end),
-    awful.key({ "Mod1"}, "=", 
+    awful.key({         }, "Print", function () awful.util.spawn("scrot -e 'mv $f ~/picture/screenshots/ 2>/dev/null'") end),
+    -- awful.key({ "Shift" }, "Print", function () awful.util.spawn("scrot -s -e 'mv $f ~/picture/ 2>/dev/null'") end),
+    awful.key({ modkey  }, "=", function() awful.util.spawn_with_shell("xbacklight -inc 10") end),
+    awful.key({ modkey  }, "-", function() awful.util.spawn_with_shell("xbacklight -dec 10") end),
+    awful.key({ "Mod1"  }, "=", 
         function() 
             awful.util.spawn_with_shell("amixer set Master 5+")
             vicious.force({vol_widget})
