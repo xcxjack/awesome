@@ -1,67 +1,66 @@
 -- {{{ Grab environment
 local http = require("socket.http")
-local io = { open = io.open }
-local setmetatable = setmetatable
-local math = { floor = math.floor }
-local table = { insert = table.insert }
 -- }}}
 
-local log_location = "/home/log"
+local log_location = "/home/logs"
 local services = {
     {name = "breakfast", url = "http://breakfast.anlaiye.com.cn/breakfast/settings/list"},
-    {name = "breakfast", url = "http://breakfast.anlaiye.com.cn/breakfast/settings/list"}
+    -- {name = "breakfast", url = "http://breakfast.anlaiye.com.cn/breakfast/settings/list"}
 }
 
-for i = 1, #services do
-    service = services[i]
-    name = service.name
-    urlstr = service.url
-    print(name)
-    print(url)
-    r, c = http.request{ url = urlstr }
-
-    print("r="..r)
-    print("c="..c)
-end
+local M = {}
+local monitor = M
 
 -- monitor: a web monitor, test web server
--- xiao.widgets.monitor
-local monitor = {}
-
--- Initialize function tables
-local result  = {}
-
 -- {{{ Monitor widget type
-local function worker(format)
-    local cpu_lines = {}
-
-    -- Get CPU stats
-    for s in services do
-        print "abc"
+function M.work()
+    local message = nil
+    for i = 1, #services do
+        local service = services[i]
+        local name = service.name
+        local dir = log_location.."/"..name
+        local old_log = dir.."/error.log"
+        local new_log = dir.."/error.new.log"
+        local urlstr = service.url
+        -- print(name)
+        -- print(urlstr)
+        local t = {}
+        local r, c, h = http.request{
+            url = urlstr,
+            sink = ltn12.sink.table(t)
+        }
+        -- return r, c, h, table.concat(t)
+        -- print("r="..r)
+        -- print("c="..c)
+        -- print("h="..table.concat(h))
+        local data = table.concat(t)
+        -- print("body="..data)
+        os.execute("mkdir -p "..dir)
+        local new_file = io.open(new_log, "w")
+        new_file:write(data)
+        new_file:write("\n")
+        local new_length = string.len(data) + 1
+        new_file:close()
+        -- print(new_length)
+        local old_file = io.open(old_log, "r")
+        if old_file == nil then
+            os.execute("cp "..new_log.." "..old_log)
+        else
+            local old_length = old_file:seek("end")
+            -- print(old_length)
+            old_file:close()
+            if new_length > old_length then
+                if message == nil then
+                    message = name
+                else
+                    message = message.." "..name
+                end
+            else
+                os.execute("cp "..new_log.." "..old_log)
+            end
+        end
     end
-
-    -- for i, v in ipairs(cpu_lines) do
-    --     -- Calculate totals
-    --     local total_new = 0
-    --     for j = 1, #v do
-    --         total_new = total_new + v[j]
-    --     end
-    --     local active_new = total_new - (v[4] + v[5])
-
-    --     -- Calculate percentage
-    --     local diff_total  = total_new - cpu_total[i]
-    --     local diff_active = active_new - cpu_active[i]
-
-    --     if diff_total == 0 then diff_total = 1E-6 end
-    --     cpu_usage[i]      = math.floor((diff_active / diff_total) * 100)
-
-    --     -- Store totals
-    --     cpu_total[i]   = total_new
-    --     cpu_active[i]  = active_new
-    -- end
-
-    return "1"
+    return message
 end
--- }}}
 
-return setmetatable(monitor, { __call = function(_, ...) return worker(...) end })
+return monitor

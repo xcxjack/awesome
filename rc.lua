@@ -11,6 +11,8 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 local vicious = require("vicious")
+local revelation = require("revelation")
+local monitor = require("monitor")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -40,6 +42,7 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init("/usr/share/awesome/themes/zenburn/theme.lua")
+revelation.init()
 theme.wallpaper = "/home/xiao/picture/ice.jpg"
 beautiful.border_width = 0
 
@@ -152,36 +155,23 @@ vicious.register(battery_widget, vicious.widgets.bat, "BAT <span color='yellow'>
 vol_widget = wibox.widget.textbox()
 vicious.register(vol_widget, vicious.widgets.volume, "$2 <span color='yellow'>$1% </span>", 13, "Master")
 
--- battery_timer = timer({timeout = 20})
--- battery_timer:connect_signal("timeout", function()
---     batteryInfo("BAT0")
--- end)
--- battery_timer:start()
+monitor_widget = wibox.widget.textbox()
+monitor_ok = "<span color = 'yellow'> OK </span>"
+-- monitor_ok = "<span color = 'red' background = 'yellow'> OK </span>"
+monitor_widget:set_markup(monitor_ok)
+monitor_timer = timer({timeout = 20})
+monitor_timer:connect_signal("timeout", 
+    function()
+        message = monitor.work()
+        if message == nil then
+            monitor_widget:set_markup(monitor_ok)
+        else
+            monitor_widget:set_markup("<span color = 'red' background = 'yellow'> "..message.." </span>")
+        end
+    end)
+monitor_timer:start()
 
--- function batteryInfo(adapter)
---     spacer = " "
---     local fcur = io.open("/sys/class/power_supply/"..adapter.."/energy_now")    
---     local fcap = io.open("/sys/class/power_supply/"..adapter.."/energy_full")
---     local fsta = io.open("/sys/class/power_supply/"..adapter.."/status")
---     local cur = fcur:read()
---     local cap = fcap:read()
---     local sta = fsta:read()
---     local battery = math.floor(cur * 100 / cap)
---     battery = " "..battery.."%"
---     if sta:match("Charging") then
---         dir = "^"
---     elseif sta:match("Discharging") then
---         dir = "v"
---    else
---         dir = "="
---     end
---     battery_widget:set_markup(spacer.."Bat:"..spacer..dir..battery..spacer)
---     fcur:close()
---     fcap:close()
---     fsta:close()
--- end
-
--- Create a wibox for each screen and add it
+-- function bat-- Create a wibox for each screen and add it
 mywibox = {}
 mypromptbox = {}
 mylayoutbox = {}
@@ -262,6 +252,7 @@ for s = 1, screen.count() do
     if s == 1 then right_layout:add(wibox.widget.systray()) end
     -- right_layout:add(dnicon)
     -- right_layout:add(mynetwidget)
+    right_layout:add(monitor_widget)
     right_layout:add(battery_widget)
     right_layout:add(vol_widget)
     right_layout:add(cpuwidget)
@@ -351,6 +342,8 @@ globalkeys = awful.util.table.join(
     -- User defined widgets
     awful.key({         }, "Print", function () awful.util.spawn("scrot -e 'mv $f ~/picture/screenshots/ 2>/dev/null'") end),
     -- awful.key({ "Shift" }, "Print", function () awful.util.spawn("scrot -s -e 'mv $f ~/picture/ 2>/dev/null'") end),
+    awful.key({ modkey  }, "e", function () awful.util.spawn(file_manager) end),
+    awful.key({ modkey  }, "s", revelation),
     awful.key({ modkey  }, "=", function() awful.util.spawn_with_shell("xbacklight -inc 10") end),
     awful.key({ modkey  }, "-", function() awful.util.spawn_with_shell("xbacklight -dec 10") end),
     awful.key({ "Mod1"  }, "=", 
@@ -576,7 +569,7 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 autorun = true
 autorunApps = 
 {
-    "xcompmgr",
+    "xcompmgr -c -C -f -F -D 3",
 }
 if autorun then
     for app = 1, #autorunApps do
