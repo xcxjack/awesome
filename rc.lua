@@ -349,12 +349,24 @@ globalkeys = awful.util.table.join(
     -- Menubar
     awful.key({ modkey }, "p", function() menubar.show() end),
 
-    -- User defined, lightness control
+    -- User defined widgets
     awful.key({ modkey }, "=", function() awful.util.spawn_with_shell("xbacklight -inc 10") end),
     awful.key({ modkey }, "-", function() awful.util.spawn_with_shell("xbacklight -dec 10") end),
-    awful.key({ "Mod1"}, "=", function() awful.util.spawn_with_shell("amixer set Master 5+") end),
-    awful.key({ "Mod1"}, "-", function() awful.util.spawn_with_shell("amixer set Master 5-") end),
-    awful.key({ "Mod1"}, "m", function() awful.util.spawn_with_shell("amixer set Master toggle") end)
+    awful.key({ "Mod1"}, "=", 
+        function() 
+            awful.util.spawn_with_shell("amixer set Master 5+")
+            vicious.force({vol_widget})
+        end),
+    awful.key({ "Mod1"}, "-", 
+        function() 
+            awful.util.spawn_with_shell("amixer set Master 5-") 
+            vicious.force({vol_widget})
+        end),
+    awful.key({ "Mod1"}, "m", 
+        function() 
+            awful.util.spawn_with_shell("amixer set Master toggle") 
+            vicious.force({vol_widget})
+        end)
 )
 
 clientkeys = awful.util.table.join(
