@@ -125,6 +125,7 @@ menu = mymainmenu })
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
+app_folders = { "/usr/share/applications/", "~/.local/share/applications/" }
 -- }}}
 
 -- {{{ Wibox
@@ -471,8 +472,8 @@ awful.rules.rules = {
     { rule = { class = "gimp" },
     properties = { floating = true } },
     -- Set Firefox to always map on tags number 2 of screen 1.
-    -- { rule = { class = "Firefox" },
-    --   properties = { tag = tags[1][2] } },
+    { rule = { class = "Firefox" },
+    properties = { tag = tags[1][2] } },
     -- { rule = { class = "QQ.exe" },
     -- properties = { 
     --     floating = true, 
@@ -569,7 +570,7 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 autorun = true
 autorunApps = 
 {
-    "xcompmgr -c -C -f -F -D 3",
+    "xcompmgr -c -C -f -F -D 3 -l 0 -t 0 -r 5",
 }
 if autorun then
     for app = 1, #autorunApps do

@@ -49,7 +49,7 @@ function M.work()
             local old_length = old_file:seek("end")
             -- print(old_length)
             old_file:close()
-            if new_length > old_length then
+            if new_length > old_length or r == false or c ~= 200 then
                 if message == nil then
                     message = name
                 else
