@@ -43,7 +43,7 @@ end
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init("/usr/share/awesome/themes/zenburn/theme.lua")
 revelation.init()
-theme.wallpaper = "/home/xiao/picture/ice.jpg"
+-- theme.wallpaper = "/home/xiao/picture/ice.jpg"
 beautiful.border_width = 0
 
 -- This is used later as the default terminal and editor to run.
@@ -81,11 +81,62 @@ local layouts =
 -- }}}
 
 -- {{{ Wallpaper
-if beautiful.wallpaper then
-    for s = 1, screen.count() do
-        gears.wallpaper.maximized(beautiful.wallpaper, s, true)
+-- if beautiful.wallpaper then
+--     for s = 1, screen.count() do
+--         gears.wallpaper.maximized(beautiful.wallpaper, s, true)
+--     end
+-- end
+
+-- {{{ Function definitions
+
+-- scan directory, and optionally filter outputs
+function scandir(directory, filter)
+    local i, t, popen = 0, {}, io.popen
+    if not filter then
+        filter = function(s) return true end
     end
+    -- print(filter)
+    for filename in popen('ls -a "'..directory..'"'):lines() do
+        if filter(filename) then
+            i = i + 1
+            t[i] = filename
+        end
+    end
+    return t
 end
+
+-- }}}
+
+math.randomseed(os.time())
+wp_path = "/home/xiao/picture/walpapers/"
+wp_files = scandir(wp_path, wp_filter)
+for s = 1, screen.count() do
+    wp_index = math.random( 1, #wp_files)
+    gears.wallpaper.maximized(wp_path .. wp_files[wp_index], s, true)
+end
+
+-- configuration - edit to your liking
+-- wp_index = 1
+-- wp_timeout  = 300
+-- wp_path = "/home/xiao/picture/walpapers/"
+-- wp_filter = function(s) return string.match(s,"%.png$") or string.match(s,"%.jpg$") end
+-- wp_files = scandir(wp_path, wp_filter)
+
+-- -- setup the timer
+-- wp_timer = timer { timeout = wp_timeout }
+-- wp_timer:connect_signal("timeout", 
+--     function()
+--         -- set wallpaper to current index for all screens
+--         for s = 1, screen.count() do
+--             wp_index = math.random( 1, #wp_files)
+--             gears.wallpaper.maximized(wp_path .. wp_files[wp_index], s, true)
+--         end
+--     end)
+
+-- -- initial start when rc.lua is first run
+-- wp_timer:start()
+
+
 -- }}}
 
 -- {{{ Tags
@@ -437,129 +488,157 @@ awful.button({ modkey }, 3, awful.mouse.client.resize))
 -- Set keys
 root.keys(globalkeys)
 -- }}}
-function myfocus_filter(c)
-    if awful.client.focus.filter(c) then
-        -- This works with tooltips and some popup-menus
-        if c.class == 'Wine' and c.above == true then
-            return nil
-        elseif c.class == 'Wine'
-                    and c.type == 'dialog'
-                    and c.skip_taskbar == true
-                    and c.size_hints.max_width and c.size_hints.max_width < 160
-            then
-            -- for popup item menus of Photoshop CS5
-            return nil
-        else
-            return c
-        end
-    end
-end
+-- function myfocus_filter(c)
+--     if awful.client.focus.filter(c) then
+--         -- This works with tooltips and some popup-menus
+--         if c.class == 'Wine' and c.above == true then
+--             return nil
+--         elseif c.class == 'Wine'
+--                     and c.type == 'dialog'
+--                     and c.skip_taskbar == true
+--                     and c.size_hints.max_width and c.size_hints.max_width < 160
+--             then
+--             -- for popup item menus of Photoshop CS5
+--             return nil
+--         else
+--             return c
+--         end
+--     end
+-- end
 -- {{{ Rules
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = {
     -- All clients will match this rule.
     { rule = { },
+    -- focus = myfocus_filter,
+    focus = awful.client.focus.filter,
     properties = { border_width = beautiful.border_width,
     border_color = beautiful.border_normal,
-    focus = awful.client.focus.filter,
     raise = true,
     keys = clientkeys,
     buttons = clientbuttons } },
-    { rule = { class = "MPlayer" },
+    -- { rule = { class = "MPlayer" },
+    -- properties = { floating = true } },
+    -- { rule = { class = "pinentry" },
+    -- properties = { floating = true } },
+    -- { rule = { class = "gimp" },
+    -- properties = { floating = true } },
+    -- -- Set Firefox to always map on tags number 2 of screen 1.
+    -- { rule = { class = "Firefox" },
+    -- properties = { tag = tags[1][2] } },
+    { rule = { class = "electronic-wechat" },
     properties = { floating = true } },
-    { rule = { class = "pinentry" },
-    properties = { floating = true } },
-    { rule = { class = "gimp" },
-    properties = { floating = true } },
-    -- Set Firefox to always map on tags number 2 of screen 1.
-    { rule = { class = "Firefox" },
-    properties = { tag = tags[1][2] } },
-    -- { rule = { class = "QQ.exe" },
-    -- properties = { 
-    --     floating = true, 
-    --     border_width = 0,
-    --     focus = myfocus_filter
-    -- } },
-    
+    { 
+        rule_any = { 
+            instance = {"QQ.exe", "TM.exe"},
+        },
+        properties = { 
+            floating = true, 
+            focusable = true,
+            border_width = 0,
+        } 
+    },
 }
 -- }}}
+-- alt_switch_keys = awful.util.table.join(
+-- -- it's easier for a vimer to manage this than figuring out a nice way to loop and concat
+-- awful.key({'Mod1'}, 1, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+1') end),
+-- awful.key({'Mod1'}, 2, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+2') end),
+-- awful.key({'Mod1'}, 3, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+3') end),
+-- awful.key({'Mod1'}, 4, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+4') end),
+-- awful.key({'Mod1'}, 5, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+5') end),
+-- awful.key({'Mod1'}, 6, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+6') end),
+-- awful.key({'Mod1'}, 7, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+7') end),
+-- awful.key({'Mod1'}, 8, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+8') end),
+-- awful.key({'Mod1'}, 9, function(c) awful.util.spawn('xdotool key --window ' .. c.window .. ' ctrl+9') end)
+-- )
+-- function bind_alt_switch_tab_keys(client)
+--     client:keys(awful.util.table.join(client:keys(), alt_switch_keys))
+-- end -- }}}
 
--- {{{ Signals
--- Signal function to execute when a new client appears.
 -- client.connect_signal("manage", function (c, startup)
+--     -- 其它配置
 
---     if c.instance == 'QQ.exe' then
+--     if c.instance == 'TM.exe' then
+--         -- 添加 Alt+n 支持
+--         bind_alt_switch_tab_keys(c)
 --         -- 关闭各类新闻通知小窗口
 --         if c.name and c.name:match('^腾讯') and c.above then
 --             c:kill()
 --         end
---     end 
-
---     -- Enable sloppy focus
---     c:connect_signal("mouse::enter", function(c)
---         if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
---             and awful.client.focus.filter(c) then
---             client.focus = c
---         end
---     end)
-
---     if not startup then
---         -- Set the windows at the slave,
---         -- i.e. put it at the end of others instead of setting it master.
---         -- awful.client.setslave(c)
-
---         -- Put windows in a smart way, only if they does not set an initial position.
---         if not c.size_hints.user_position and not c.size_hints.program_position then
---             awful.placement.no_overlap(c)
---             awful.placement.no_offscreen(c)
---         end
 --     end
 
---     local titlebars_enabled = false
---     if titlebars_enabled and (c.type == "normal" or c.type == "dialog") then
---         -- buttons for the titlebar
---         local buttons = awful.util.table.join(
---         awful.button({ }, 1, function()
---             client.focus = c
---             c:raise()
---             awful.mouse.client.move(c)
---         end),
---         awful.button({ }, 3, function()
---             client.focus = c
---             c:raise()
---             awful.mouse.client.resize(c)
---         end)
---         )
-
---         -- Widgets that are aligned to the left
---         local left_layout = wibox.layout.fixed.horizontal()
---         left_layout:add(awful.titlebar.widget.iconwidget(c))
---         left_layout:buttons(buttons)
-
---         -- Widgets that are aligned to the right
---         local right_layout = wibox.layout.fixed.horizontal()
---         right_layout:add(awful.titlebar.widget.floatingbutton(c))
---         right_layout:add(awful.titlebar.widget.maximizedbutton(c))
---         right_layout:add(awful.titlebar.widget.stickybutton(c))
---         right_layout:add(awful.titlebar.widget.ontopbutton(c))
---         right_layout:add(awful.titlebar.widget.closebutton(c))
-
---         -- The title goes in the middle
---         local middle_layout = wibox.layout.flex.horizontal()
---         local title = awful.titlebar.widget.titlewidget(c)
---         title:set_align("center")
---         middle_layout:add(title)
---         middle_layout:buttons(buttons)
-
---         -- Now bring it all together
---         local layout = wibox.layout.align.horizontal()
---         layout:set_left(left_layout)
---         layout:set_right(right_layout)
---         layout:set_middle(middle_layout)
-
---         awful.titlebar(c):set_widget(layout)
---     end
+--     -- 其它配置
 -- end)
+
+-- {{{ Signals
+-- Signal function to execute when a new client appears.
+client.connect_signal("manage", function (c, startup)
+    -- Enable sloppy focus
+    c:connect_signal("mouse::enter", function(c)
+        if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
+            and awful.client.focus.filter(c) then
+            client.focus = c
+        end
+    end)
+
+    if not startup then
+        -- Set the windows at the slave,
+        -- i.e. put it at the end of others instead of setting it master.
+        -- awful.client.setslave(c)
+
+        -- Put windows in a smart way, only if they does not set an initial position.
+        if not c.size_hints.user_position and not c.size_hints.program_position then
+            awful.placement.no_overlap(c)
+            awful.placement.no_offscreen(c)
+        end
+    end
+
+    local titlebars_enabled = false
+    if titlebars_enabled and (c.type == "normal" or c.type == "dialog") then
+        -- buttons for the titlebar
+        local buttons = awful.util.table.join(
+        awful.button({ }, 1, function()
+            client.focus = c
+            c:raise()
+            awful.mouse.client.move(c)
+        end),
+        awful.button({ }, 3, function()
+            client.focus = c
+            c:raise()
+            awful.mouse.client.resize(c)
+        end)
+        )
+
+        -- Widgets that are aligned to the left
+        local left_layout = wibox.layout.fixed.horizontal()
+        left_layout:add(awful.titlebar.widget.iconwidget(c))
+        left_layout:buttons(buttons)
+
+        -- Widgets that are aligned to the right
+        local right_layout = wibox.layout.fixed.horizontal()
+        right_layout:add(awful.titlebar.widget.floatingbutton(c))
+        right_layout:add(awful.titlebar.widget.maximizedbutton(c))
+        right_layout:add(awful.titlebar.widget.stickybutton(c))
+        right_layout:add(awful.titlebar.widget.ontopbutton(c))
+        right_layout:add(awful.titlebar.widget.closebutton(c))
+
+        -- The title goes in the middle
+        local middle_layout = wibox.layout.flex.horizontal()
+        local title = awful.titlebar.widget.titlewidget(c)
+        title:set_align("center")
+        middle_layout:add(title)
+        middle_layout:buttons(buttons)
+
+        -- Now bring it all together
+        local layout = wibox.layout.align.horizontal()
+        layout:set_left(left_layout)
+        layout:set_right(right_layout)
+        layout:set_middle(middle_layout)
+
+        awful.titlebar(c):set_widget(layout)
+    end
+end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
